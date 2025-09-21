@@ -11,22 +11,21 @@ A simple app to log and share travel experiences.
 
 ## Sovelluksen asennus
 
-Asenna 'flask'-kirjasto:
+Asenna ```flask``` -kirjasto:
 
-
-...
+```
 $ pip install Flask
-...
+```
 
 Luo tietokannan taulut ja lisää alkutiedot:
 
-...
+```
 $ sqlite3 database.db < schema.sql
 $ sqlite3 database.db < nit.sql
-:::
+```
 
 Voit käynnistää sovelluksen näin:
 
-...
+```
 $ flask run
-...
+```
