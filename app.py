@@ -8,12 +8,17 @@ import db
 app = Flask(__name__)
 app.secret_key = config.secret_key
 
-#etusivu
+#front pg
 @app.route("/")
 def index():
     return render_template("index.html")
 
-#rekisteröitymissivu
+#Uusi sivu linkki
+@app.route("/new_item")
+def new_item():
+    return render_template("new_item.html")
+
+#registration pg
 @app.route("/register")
 def register():
     return render_template("register.html")
@@ -41,7 +46,6 @@ def create():
 def login():
     if request.method == "GET":
         return render_template("login.html")
-    
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
