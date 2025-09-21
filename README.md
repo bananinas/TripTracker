@@ -8,3 +8,25 @@ A simple app to log and share travel experiences.
 - Sovelluksessa on käyttäjäsivut, jotka näyttävät jokaisesta käyttäjästä tilastoja ja käyttäjän lisäämät matkakuvaukset.
 - Käyttäjä pystyy valitsemaan tietokohteelle yhden tai useamman luokittelun (esim. kohdemaan, -kaupungin, matkustustapa, matkan ajankohta). Luokat ovat valmiina tietokannassa.
 - Käyttäjä pystyy kommentoimaan muiden matkakuvauksia.
+
+## Sovelluksen asennus
+
+Asenna 'flask'-kirjasto:
+
+
+...
+$ pip install Flask
+...
+
+Luo tietokannan taulut ja lisää alkutiedot:
+
+...
+$ sqlite3 database.db < schema.sql
+$ sqlite3 database.db < nit.sql
+:::
+
+Voit käynnistää sovelluksen näin:
+
+...
+$ flask run
+...
