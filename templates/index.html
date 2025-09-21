@@ -1,15 +1,26 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 
 <head>
-<title>TripTracker</title>
+  <title>TripTracker</title>
 </head>
 
 <body>
-<h1><b>Welcome to TripTracker!</b></h1>
- <p>
-   This is an inspirational app where you can read and write about your own travel experiences and adventures.
- </p>
+    <h1><b>TripTracker!</b></h1>
+  {% if session.username %}
+  <p>
+    You are signed in with user name {{ session.username }}
+  </p>
+  <p>
+    Welcome! This is an inspirational app where you can read and write about your own travel experiences and adventures.
+  </p>
+  {% endif %}
+
+  <p>
+    <a href="/login">Sign in</a>
+    <a href="/register">Register</a>
+    <a href="/logout">Sign out</a>
+  </p>
 </body>
 
 </html>
