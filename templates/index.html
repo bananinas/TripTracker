@@ -5,25 +5,42 @@
   <title>TripTracker</title>
 </head>
 
+
 <body>
-    <h1><b>TripTracker!</b></h1>
-  {% if session.username %}
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <p>{{ msg }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <h1><b>TripTracker</b></h1>
+<p>
+    Welcome to get inspired and to inspire others in the world of travel experiences and adventures!
+</p>
+    {% if session.username %}
+   <!-- Shown if user if signed IN -->
   <p>
-    You are signed in with user name {{ session.username }}
+    You are signed in with user name <b>{{ session.username }}</b>.
   </p>
   <p>
-    Welcome! This is an inspirational app where you can read and write about your own travel experiences and adventures.
+  <a href="/new_report">Add a report</a>&nbsp;
+  <a href="/logout">Sign out</a>
+  </p>
+  
+  {% else %}
+   <!-- Shown if user is signed OUT -->
+<!--<p>
+    See you later!
+  </p>-->
+  <p>
+    <a href="/login">Sign in</a>&nbsp;
+    <a href="/register">Register</a> 
   </p>
   {% endif %}
 
-  <p>
-    <a href="/login">Sign in</a>
-    <a href="/register">Register</a>
-    <a href="/logout">Sign out</a>
-  </p>
-  <p>
-    <a href="/new_item">Add a report</a>
-  </p>
+  
 </body>
 
 </html>
