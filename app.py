@@ -34,8 +34,14 @@ def create():
     username = request.form["username"]
     password1 = request.form["password1"]
     password2 = request.form["password2"]
+    #basic check
     if not username or not password1 or not password2:
         return render_template("register.html", error="Fill in all fields please.")
+    #min length check
+    if len(username) < 3:
+        return render_template("register.html", error="Username must be at least 3 characters.")
+    if len(password1) < 4:
+        return render_template("register.html", error="Password must be at least 4 characters.")    
     if password1 != password2:
         return render_template("register.html", error="Passwords do not match, try again.")
     try:
