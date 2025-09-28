@@ -6,21 +6,30 @@
 </head>
 
 <body>
+
+{% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
+
   <form action="/create" method="post">
     <p>
-      Tunnus: <br />
+      Username: <br />
       <input type="text" name="username" />
     </p>
     <p>
-      Salasana: <br />
+      Password: <br />
       <input type="password" name="password1" />
     </p>
     <p>
-      Salasana uudestaan: <br />
+      Retype password: <br />
       <input type="password" name="password2" />
     </p>
-    <input type="submit" value="Luo tunnus" />
+    <input type="submit" value="Create username" />
   </form>
+
+<p>
+  Already have an account? <a href="/login">Sign in</a>
+</p>
 </body>
 
 </html>
