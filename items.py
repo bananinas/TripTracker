@@ -1,0 +1,23 @@
+import db
+
+def add_item(username, title, description, travel_date):
+    sql = "INSERT INTO items (username, title, description, travel_date) VALUES (?, ?, ?, ?)"
+    db.execute(sql, [username, title, description, travel_date])
+
+def get_items():
+    sql = "SELECT id, title, travel_date FROM items ORDER BY id DESC"
+    return db.query(sql)
+
+def get_report(report_id):
+    sql = """SELECT items.id,
+                    items.title,
+                    items.description,
+                    items.travel_date,
+                    users.username
+             FROM items
+             JOIN users ON items.username = users.username
+             WHERE items.id = ?"""
+    result = db.query(sql, [report_id])
+    if result:
+        return result[0]
+    return None

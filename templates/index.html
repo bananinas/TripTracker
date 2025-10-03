@@ -28,19 +28,30 @@
   <a href="/new_report">Add a report</a>&nbsp;
   <a href="/logout">Sign out</a>
   </p>
-  
+ 
   {% else %}
    <!-- Shown if user is signed OUT -->
-<!--<p>
-    See you later!
-  </p>-->
-  <p>
+ <p>
     <a href="/login">Sign in</a>&nbsp;
     <a href="/register">Register</a> 
   </p>
   {% endif %}
 
-  
-</body>
+  <!-- here are the list of reports / sign in msg -->
+  {% if session.username %}
+<h2>Travel reports</h2>
+<ul>
+  {% for report in reports %}
+    <li>
+      <a href="/report/{{ report.id }}">
+        {{ report.title }}
+      </a> ({{ report.travel_date }})
+    </li>
+  {% endfor %}
+</ul>
 
+  {% else %}
+    <p>Please sign in to see travel reports.</p>
+  {% endif %}
+</body>
 </html>

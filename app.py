@@ -4,6 +4,7 @@ from flask import redirect, render_template, request, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import config
 import db
+import items
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
@@ -11,17 +12,36 @@ app.secret_key = config.secret_key
 #front pg
 @app.route("/")
 def index():
-    return render_template("index.html")
+    reports = items.get_items()  # fetch reports from database items-table
+    return render_template("index.html", reports=reports)
+
+@app.route("/report/<int:report_id>")
+def show_report(report_id):
+    report = items.get_report(report_id)
+    if not report:
+        return "Report not found", 404
+    return render_template("show_report.html", report=report)
 
 #New report
 @app.route("/new_report")
 def new_report():
+
     return render_template("new_report.html")
 
-#@app.route("/create_item", methods=["POST"])
-#def create_item():
-#    title = request.form["title"]
-#    description = request.form["description"]
+@app.route("/create_item", methods=["POST"])
+def create_item():
+    title = request.form["title"]
+    description = request.form["description"]
+    travel_date = request.form["travel_date"]
+    username = session["username"]
+    # Make sure fields ar enot empty
+    if not title or not description or not travel_date:
+        return render_template("new_report.html", error="Please fill in all fields.")
+    # add travel report to database
+    items.add_item(username, title, description, travel_date)
+
+    return redirect("/")  # directs user to front pg
+
 
 #registration pg
 @app.route("/register")
