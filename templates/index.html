@@ -46,6 +46,9 @@
       <a href="/report/{{ report.id }}">
         {{ report.title }}
       </a> ({{ report.travel_date }})
+      {% if session.username == report.username %}
+        <small style="color: gray;">— your report</small>
+      {% endif %}
     </li>
   {% endfor %}
 </ul>

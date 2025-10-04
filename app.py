@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import config
 import db
 import items
+import re
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
@@ -14,13 +15,6 @@ app.secret_key = config.secret_key
 def index():
     reports = items.get_items()  # fetch reports from database items-table
     return render_template("index.html", reports=reports)
-
-@app.route("/report/<int:report_id>")
-def show_report(report_id):
-    report = items.get_report(report_id)
-    if not report:
-        return "Report not found", 404
-    return render_template("show_report.html", report=report)
 
 #New report
 @app.route("/new_report")
@@ -37,10 +31,63 @@ def create_item():
     # Make sure fields ar enot empty
     if not title or not description or not travel_date:
         return render_template("new_report.html", error="Please fill in all fields.")
-    # add travel report to database
-    items.add_item(username, title, description, travel_date)
+    # Date form check (MM/YYYY)
+    if not re.match(r"^\d{2}/\d{4}$", travel_date):
+        return render_template("new_report.html", error="Please use format MM/YYYY.")
 
-    return redirect("/")  # directs user to front pg
+    # Check sensible montd
+    month, year = travel_date.split("/")
+    if not (1 <= int(month) <= 12):
+        return render_template("new_report.html", error="Month must be between 01 and 12.")
+
+    # Save report
+    items.add_item(username, title, description, travel_date)
+    return redirect("/")
+
+@app.route("/report/<int:report_id>")
+def show_report(report_id):
+    report = items.get_report(report_id)
+    if not report:
+        return "Report not found", 404
+    return render_template("show_report.html", report=report)
+
+#shows edit report sheet
+@app.route("/report/<int:report_id>/edit")
+def edit_report(report_id):
+    report = items.get_report(report_id)
+    if not report:
+        return "Report not found", 404
+    if report["username"] != session.get("username"):
+        return "Unauthorized", 403
+
+    return render_template("edit_report.html", report=report)
+#updates edited report
+@app.route("/report/<int:report_id>/update", methods=["POST"])
+def update_report(report_id):
+    report = items.get_report(report_id)
+    if not report:
+        return "Report not found", 404
+    if report["username"] != session.get("username"):
+        return "Unauthorized", 403
+
+    title = request.form["title"]
+    description = request.form["description"]
+    travel_date = request.form["travel_date"]
+
+    items.update_report(report_id, title, description, travel_date)
+    return redirect(f"/report/{report_id}")
+
+#delete report
+@app.route("/report/<int:report_id>/delete")
+def delete_report(report_id):
+    report = items.get_report(report_id)
+    if not report:
+        return "Report not found", 404
+    if report["username"] != session.get("username"):
+        return "Unauthorized", 403
+
+    items.delete_report(report_id)
+    return redirect("/")
 
 
 #registration pg

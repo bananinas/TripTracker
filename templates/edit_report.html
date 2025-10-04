@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit report</title>
+</head>
+<body>
+
+  <h1>Edit report</h1>
+<form action="/report/{{ report.id }}/update" method="post">
+  <p>Destination:<br>
+    <input type="text" name="title" value="{{ report.title }}">
+  </p>
+
+  <p>Description:<br>
+    <textarea name="description" rows="8" cols="60">{{ report.description }}</textarea>
+  </p>
+
+  <p>Travel date:<br>
+    <input type="text" name="travel_date" value="{{ report.travel_date }}">
+  </p>
+
+  <input type="submit" value="Save changes">
+</form>
+
+</body>
+</html>
+
+

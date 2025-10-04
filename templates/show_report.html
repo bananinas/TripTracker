@@ -8,6 +8,17 @@
   <p><em>{{ report.travel_date }}</em></p>
   <p>{{ report.description }}</p>
   <p><small>Report added by: {{ report.username }}</small></p>
+  
+
+  {% if session.username == report.username %}
+  <p>
+    <a href="/report/{{ report.id }}/edit"> Edit report</a> |
+    <a href="/report/{{ report.id }}/delete" onclick="return confirm('Are you sure you want to delete this report?');"> Delete report</a>
+  </p>
+
   <p><a href="/">Back to reports</a></p>
+
+  {% endif %}
+
 </body>
 </html>

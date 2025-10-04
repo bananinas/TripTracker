@@ -5,7 +5,7 @@ def add_item(username, title, description, travel_date):
     db.execute(sql, [username, title, description, travel_date])
 
 def get_items():
-    sql = "SELECT id, title, travel_date FROM items ORDER BY id DESC"
+    sql = "SELECT id, title, description, travel_date, username FROM items ORDER BY id DESC"
     return db.query(sql)
 
 def get_report(report_id):
@@ -21,3 +21,11 @@ def get_report(report_id):
     if result:
         return result[0]
     return None
+
+def update_report(report_id, title, description, travel_date):
+    sql = "UPDATE items SET title=?, description=?, travel_date=? WHERE id=?"
+    db.execute(sql, [title, description, travel_date, report_id])
+
+def delete_report(report_id):
+    sql = "DELETE FROM items WHERE id=?"
+    db.execute(sql, [report_id])
