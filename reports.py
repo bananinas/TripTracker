@@ -39,6 +39,7 @@ def update_report(report_id, title, description, travel_date, country):
     """
     db.execute(sql, [title, description, travel_date, country, report_id])
 
+
 # delete report
 def delete_report(report_id):
     sql = "DELETE FROM reports WHERE id = ?"

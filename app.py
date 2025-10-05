@@ -13,16 +13,22 @@ app.secret_key = config.secret_key
 #front pg
 @app.route("/")
 def index():
+    query = request.args.get("q", "").strip()  # search by searchword if given
     all_reports = reports.get_reports()
-    grouped = {}
+    # filter if searchword given
+    if query:
+        all_reports = [r for r in all_reports if query.lower() in r["title"].lower()]
 
+    grouped = {}
     for r in all_reports:
         country = r["country"] or "Unknown"
         if country not in grouped:
             grouped[country] = []
         grouped[country].append(r)
 
-    return render_template("index.html", grouped=grouped)
+    # countries in alphabetical order
+    sorted_grouped = dict(sorted(grouped.items()))
+    return render_template("index.html", grouped=sorted_grouped)
 
 #New report
 @app.route("/new_report")
@@ -37,17 +43,40 @@ def create_report():
     travel_date = request.form["travel_date"]
     username = session["username"]
     country = request.form["country"]
-    # Make sure fields ar enot empty
+
+    # Make sure fields are not empty
     if not title or not description or not travel_date:
-        return render_template("new_report.html", error="Please fill in all fields.")
+        return render_template(
+            "new_report.html",
+            error="Please fill in all fields.",
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date
+        )
+
     # Date form check (MM/YYYY)
     if not re.match(r"^\d{2}/\d{4}$", travel_date):
-        return render_template("new_report.html", error="Please use format MM/YYYY.")
+        return render_template(
+            "new_report.html",
+            error="Please use format MM/YYYY.",
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date
+        )
 
-    # Check sensible montd
+    # Check sensible month
     month, year = travel_date.split("/")
     if not (1 <= int(month) <= 12):
-        return render_template("new_report.html", error="Month must be between 01 and 12.")
+        return render_template(
+            "new_report.html",
+            error="Month must be between 01 and 12.",
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date
+        )
 
     # Save report
     reports.add_report(username, title, description, travel_date, country)
@@ -70,6 +99,7 @@ def edit_report(report_id):
         return "Unauthorized", 403
 
     return render_template("edit_report.html", report=report)
+
 #updates edited report
 @app.route("/report/<int:report_id>/update", methods=["POST"])
 def update_report(report_id):
@@ -82,8 +112,9 @@ def update_report(report_id):
     title = request.form["title"]
     description = request.form["description"]
     travel_date = request.form["travel_date"]
+    country = request.form["country"]
 
-    reports.update_report(report_id, title, description, travel_date)
+    reports.update_report(report_id, title, description, travel_date, country)
     return redirect(f"/report/{report_id}")
 
 #delete report
@@ -98,6 +129,21 @@ def delete_report(report_id):
     reports.delete_report(report_id)
     return redirect("/")
 
+@app.route("/user/<username>")
+def user_page(username):
+    all_reports = reports.get_reports()
+    user_reports = [r for r in all_reports if r["username"] == username]
+
+    total_reports = len(user_reports)
+    countries = sorted(set(r["country"] or "Unknown" for r in user_reports))
+
+    return render_template(
+        "user_page.html",
+        username=username,
+        reports=user_reports,
+        total_reports=total_reports,
+        countries=countries
+    )
 
 #registration pg
 @app.route("/register")

@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>New report</title>
 </head>
-
 <body>
 {% if error %}
 <p style="color:red;">{{ error }}</p>
@@ -12,25 +10,24 @@
 
 <h1>New report</h1>
 
-<p>Country:<br>
-  <input type="text" name="country">
-</p>
-
-<form action="/create_item" method="post">    <!-- create_item creates actual report -->
-    <p> Destination: <br />
-      <input type="text" name="title" />
-    </p>
-    <p>
-      Description: <br />
-      <textarea name="description" rows="8" cols="60"></textarea>  
-    </p>
-  
-  <p>
-    Travel date (MM/YYYY): <br />
-    <input type="text" name="travel_date" placeholder="MM/YYYY" required>
+<form action="/create_report" method="post">
+  <p>Country:<br>
+    <input type="text" name="country" value="{{ country or '' }}">
   </p>
-    <input type="submit" value="Create report" />
+
+  <p>Destination:<br>
+    <input type="text" name="title" value="{{ title or '' }}">
+  </p>
+
+  <p>Description:<br>
+    <textarea name="description" rows="8" cols="60">{{ description or '' }}</textarea>
+  </p>
+
+  <p>Travel date (MM/YYYY):<br>
+    <input type="text" name="travel_date" value="{{ travel_date or '' }}" placeholder="MM/YYYY" required>
+  </p>
+
+  <input type="submit" value="Create report">
 </form>
 </body>
-
 </html>

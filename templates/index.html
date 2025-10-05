@@ -41,6 +41,11 @@
   {% if session.username %}
 <h2>Travel reports</h2>
 
+<form action="/" method="get">
+  <input type="text" name="q" placeholder="Search by destination" value="{{ request.args.get('q', '') }}">
+  <input type="submit" value="Search">
+</form>
+
 {% for country, reports_in_country in grouped.items() %}
   <h3>{{ country }}</h3>
   <ul>
@@ -48,9 +53,12 @@
       <li>
         <a href="/report/{{ report.id }}">{{ report.title }}</a>
         ({{ report.travel_date }})
-        {% if session.username == report.username %}
-          <small style="color: gray;">— my report</small>
-        {% endif %}
+
+        <small>
+          by <a href="/user/{{ report.username }}">{{ report.username }}</a>
+        </small>
+
+
       </li>
     {% endfor %}
   </ul>

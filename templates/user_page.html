@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ username }}'s reports</title>
+</head>
+<body>
+
+<h1>Reports by {{ username }}</h1>
+
+<p>Total reports: {{ total_reports }}</p>
+
+{% if countries %}
+  <p>Countries visited: {{ countries|length }}</p>
+{% endif %}
+
+<h2>My travel reports</h2>
+
+{% if reports %}
+  <ul>
+  {% for r in reports %}
+    <li>
+      <a href="/report/{{ r.id }}"><b>{{ r.title }}</b></a>
+      — {{ r.travel_date }}
+      {% if r.country %} ({{ r.country }}) {% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+{% else %}
+  <p>No reports yet.</p>
+{% endif %}
+
+<p><a href="/">Back to main page</a></p>
+
+</body>
+</html>
