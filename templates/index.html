@@ -40,18 +40,21 @@
   <!-- here are the list of reports / sign in msg -->
   {% if session.username %}
 <h2>Travel reports</h2>
-<ul>
-  {% for report in reports %}
-    <li>
-      <a href="/report/{{ report.id }}">
-        {{ report.title }}
-      </a> ({{ report.travel_date }})
-      {% if session.username == report.username %}
-        <small style="color: gray;">— your report</small>
-      {% endif %}
-    </li>
-  {% endfor %}
-</ul>
+
+{% for country, reports_in_country in grouped.items() %}
+  <h3>{{ country }}</h3>
+  <ul>
+    {% for report in reports_in_country %}
+      <li>
+        <a href="/report/{{ report.id }}">{{ report.title }}</a>
+        ({{ report.travel_date }})
+        {% if session.username == report.username %}
+          <small style="color: gray;">— my report</small>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endfor %}
 
   {% else %}
     <p>Please sign in to see travel reports.</p>

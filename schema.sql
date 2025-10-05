@@ -19,5 +19,6 @@ CREATE TABLE reports (
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- automatically saves date and time of when row was created --
+    country TEXT,
     FOREIGN KEY(username) REFERENCES users(username)
 );

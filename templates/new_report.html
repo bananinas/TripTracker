@@ -11,6 +11,11 @@
 {% endif %}
 
 <h1>New report</h1>
+
+<p>Country:<br>
+  <input type="text" name="country">
+</p>
+
 <form action="/create_item" method="post">    <!-- create_item creates actual report -->
     <p> Destination: <br />
       <input type="text" name="title" />
@@ -22,7 +27,7 @@
   
   <p>
     Travel date (MM/YYYY): <br />
-    <input type="text" name="travel_date" placeholder="MM/YYYY" pattern="^(0[1-9]|1[0-2])/(19[0-9]{2}|20[0-9]{2}|2100)$" required>
+    <input type="text" name="travel_date" placeholder="MM/YYYY" required>
   </p>
     <input type="submit" value="Create report" />
 </form>

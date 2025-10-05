@@ -4,7 +4,7 @@ from flask import redirect, render_template, request, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import config
 import db
-import items
+import reports
 import re
 
 app = Flask(__name__)
@@ -13,8 +13,16 @@ app.secret_key = config.secret_key
 #front pg
 @app.route("/")
 def index():
-    reports = items.get_items()  # fetch reports from database items-table
-    return render_template("index.html", reports=reports)
+    all_reports = reports.get_reports()
+    grouped = {}
+
+    for r in all_reports:
+        country = r["country"] or "Unknown"
+        if country not in grouped:
+            grouped[country] = []
+        grouped[country].append(r)
+
+    return render_template("index.html", grouped=grouped)
 
 #New report
 @app.route("/new_report")
@@ -22,12 +30,13 @@ def new_report():
 
     return render_template("new_report.html")
 
-@app.route("/create_item", methods=["POST"])
-def create_item():
+@app.route("/create_report", methods=["POST"])
+def create_report():
     title = request.form["title"]
     description = request.form["description"]
     travel_date = request.form["travel_date"]
     username = session["username"]
+    country = request.form["country"]
     # Make sure fields ar enot empty
     if not title or not description or not travel_date:
         return render_template("new_report.html", error="Please fill in all fields.")
@@ -41,12 +50,12 @@ def create_item():
         return render_template("new_report.html", error="Month must be between 01 and 12.")
 
     # Save report
-    items.add_item(username, title, description, travel_date)
+    reports.add_report(username, title, description, travel_date, country)
     return redirect("/")
 
 @app.route("/report/<int:report_id>")
 def show_report(report_id):
-    report = items.get_report(report_id)
+    report = reports.get_report(report_id)
     if not report:
         return "Report not found", 404
     return render_template("show_report.html", report=report)
@@ -54,7 +63,7 @@ def show_report(report_id):
 #shows edit report sheet
 @app.route("/report/<int:report_id>/edit")
 def edit_report(report_id):
-    report = items.get_report(report_id)
+    report = reports.get_report(report_id)
     if not report:
         return "Report not found", 404
     if report["username"] != session.get("username"):
@@ -64,7 +73,7 @@ def edit_report(report_id):
 #updates edited report
 @app.route("/report/<int:report_id>/update", methods=["POST"])
 def update_report(report_id):
-    report = items.get_report(report_id)
+    report = reports.get_report(report_id)
     if not report:
         return "Report not found", 404
     if report["username"] != session.get("username"):
@@ -74,19 +83,19 @@ def update_report(report_id):
     description = request.form["description"]
     travel_date = request.form["travel_date"]
 
-    items.update_report(report_id, title, description, travel_date)
+    reports.update_report(report_id, title, description, travel_date)
     return redirect(f"/report/{report_id}")
 
 #delete report
 @app.route("/report/<int:report_id>/delete")
 def delete_report(report_id):
-    report = items.get_report(report_id)
+    report = reports.get_report(report_id)
     if not report:
         return "Report not found", 404
     if report["username"] != session.get("username"):
         return "Unauthorized", 403
 
-    items.delete_report(report_id)
+    reports.delete_report(report_id)
     return redirect("/")
 
 
