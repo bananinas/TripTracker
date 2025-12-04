@@ -1,4 +1,29 @@
+# --- Virtual environment ---
 venv/
+env/
+
+# --- Python cache and bytecode ---
 __pycache__/
 *.pyc
+*.pyo
+
+# --- Database files ---
 database.db
+*.sqlite
+*.db-journal
+
+# --- Uploads and generated media ---
+uploads/
+static/uploads/
+
+# --- Logs and temp files ---
+*.log
+*.tmp
+
+# --- Secrets ---
+config.py
+
+# --- OS-specific files ---
+.DS_Store
+Thumbs.db
+

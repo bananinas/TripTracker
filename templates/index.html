@@ -1,71 +1,86 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>TripTracker</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
-
-
 <body>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for msg in messages %}
-          <p>{{ msg }}</p>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for msg in messages %}
+        <p>{{ msg }}</p>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
-    <h1><b>TripTracker</b></h1>
-<p>
+{% if session.get('username') %}
+  <p style="margin-bottom: 10px;">
+    <a href="/">Home</a>
+    | <a href="/user/{{ session['username'] }}">My reports</a>
+    | <a href="/new_report">Add report</a>
+    | <a href="/logout">Logout</a>
+  </p>
+{% endif %}
+
+<hr>
+
+  <h1><b>TripTracker</b></h1>
+  <p>
     Welcome to get inspired and to inspire others in the world of travel experiences and adventures!
-</p>
-    {% if session.username %}
-   <!-- Shown if user if signed IN -->
-  <p>
-    You are signed in with user name <b>{{ session.username }}</b>.
   </p>
-  <p>
-  <a href="/new_report">Add a report</a>&nbsp;
-  <a href="/logout">Sign out</a>
-  </p>
- 
+
+  {% if session.username %}
+    <!-- Shown if user is signed IN -->
+    <p>
+      You are signed in with your user name 
+      <a href="/user/{{ session.username }}" style="color: rgb(0, 113, 128); text-decoration: none; font-weight: bold;">
+        {{ session.username }}
+      </a>.
+    </p>
+
+
   {% else %}
-   <!-- Shown if user is signed OUT -->
- <p>
-    <a href="/login">Sign in</a>&nbsp;
-    <a href="/register">Register</a> 
-  </p>
+    <!-- Shown if user is signed OUT -->
+    <p>Please login to see travel reports.</p>
+    <p>
+      <a href="/login">Login</a>&nbsp;
+      <a href="/register">Register</a>
+    </p>
   {% endif %}
 
   <!-- here are the list of reports / sign in msg -->
   {% if session.username %}
-<h2>Travel reports</h2>
+    <h2>Travel reports</h2>
 
-<form action="/" method="get">
-  <input type="text" name="q" placeholder="Search by destination" value="{{ request.args.get('q', '') }}">
-  <input type="submit" value="Search">
-</form>
+    <form action="/" method="get">
+      <input type="text" name="q" placeholder="Search by country or destination"
+             value="{{ request.args.get('q', '') }}" size="25">
+      <input type="submit" value="Search">
+    </form>
 
-{% for country, reports_in_country in grouped.items() %}
-  <h3>{{ country }}</h3>
-  <ul>
-    {% for report in reports_in_country %}
-      <li>
-        <a href="/report/{{ report.id }}">{{ report.title }}</a>
-        ({{ report.travel_date }})
+    {% if not grouped %}
+      <p>No reports found for your search.</p>
+    {% endif %}
 
-        <small>
-          by <a href="/user/{{ report.username }}">{{ report.username }}</a>
-        </small>
+    {% if request.args.get('q') %}
+      <p><a href="/">Clear search</a></p>
+    {% endif %}
 
-
-      </li>
+    {% for country, reports_in_country in grouped.items() %}
+      <h3>{{ country }}</h3>
+      <ul>
+        {% for report in reports_in_country %}
+          <li>
+            <a href="/report/{{ report.id }}">{{ report.title }}</a>
+            ({{ report.travel_date }})
+            <small>
+              by <a href="/user/{{ report.username }}">{{ report.username }}</a>
+            </small>
+          </li>
+        {% endfor %}
+      </ul>
     {% endfor %}
-  </ul>
-{% endfor %}
-
-  {% else %}
-    <p>Please sign in to see travel reports.</p>
   {% endif %}
 </body>
 </html>
+

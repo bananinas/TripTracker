@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My comments</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h2>My comments</h2>
+
+  {% if comments %}
+    <ul>
+      {% for c in comments %}
+        <li>
+          <b>{{ c.created_at }}</b> on
+          <a href="/report/{{ c.report_id }}">{{ c.title }}</a><br>
+          {{ c.content | replace('\n', '<br>') | safe }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You haven’t written any comments yet.</p>
+  {% endif %}
+
+  <p><a href="/">Back to main page</a></p>
+</body>
+</html>

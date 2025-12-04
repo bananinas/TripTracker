@@ -1,14 +1,27 @@
+import os
 import sqlite3
-from flask import Flask 
-from flask import redirect, render_template, request, session, flash
+from flask import Flask, redirect, render_template, request, session, flash, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import config
 import db
 import reports
 import re
+import classes
+import users
+import comments
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
+
+# Kuvien asetukset
+UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+#check function for uploaded files
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 #front pg
 @app.route("/")
@@ -17,77 +30,138 @@ def index():
     all_reports = reports.get_reports()
     # filter if searchword given
     if query:
-        all_reports = [r for r in all_reports if query.lower() in r["title"].lower()]
+        all_reports = [
+            r for r in all_reports
+            if query.lower() in r["title"].lower()
+            or query.lower() in (r["country"] or "").lower()
+        ]
 
     grouped = {}
     for r in all_reports:
-        country = r["country"] or "Unknown"
+        country = r["country"] or "Unknown country"
         if country not in grouped:
             grouped[country] = []
         grouped[country].append(r)
 
     # countries in alphabetical order
-    sorted_grouped = dict(sorted(grouped.items()))
+    sorted_grouped = dict(
+    sorted(grouped.items(), key=lambda item: (item[0] == "Unknown country", item[0]))
+)
+    if query and not all_reports:
+        flash("No results found for your search.")
+
     return render_template("index.html", grouped=sorted_grouped)
 
-#New report
-@app.route("/new_report")
+# New report
+@app.route("/new_report", methods=["GET"])
 def new_report():
+    if "username" not in session:
+        return redirect("/login")
 
-    return render_template("new_report.html")
+    holiday_types = classes.get_holiday_types()
+    themes = classes.get_themes()
+
+    return render_template(
+        "new_report.html",
+        holiday_types=holiday_types,
+        themes=themes
+    )
 
 @app.route("/create_report", methods=["POST"])
 def create_report():
-    title = request.form["title"]
-    description = request.form["description"]
-    travel_date = request.form["travel_date"]
-    username = session["username"]
-    country = request.form["country"]
+    if "username" not in session:
+        return redirect("/login")
 
-    # Make sure fields are not empty
-    if not title or not description or not travel_date:
+    # Sheet data
+    title       = request.form.get("title", "").strip()
+    description = request.form.get("description", "").strip()
+    travel_date = request.form.get("travel_date", "").strip()
+    username    = session["username"]
+    country     = request.form.get("country", "").strip()
+    section     = request.form.get("section", "").strip()  # Holiday type
+    theme       = request.form.get("theme", "").strip()    # Theme
+
+    # Check empty fields
+    if not title or not description or not travel_date or not section or not theme:
+        holiday_types = classes.get_holiday_types()
+        themes = classes.get_themes()
         return render_template(
             "new_report.html",
             error="Please fill in all fields.",
             title=title,
             description=description,
             country=country,
-            travel_date=travel_date
+            travel_date=travel_date,
+            holiday_types=holiday_types,
+            themes=themes
         )
 
-    # Date form check (MM/YYYY)
+    # Date (MM/YYYY)
     if not re.match(r"^\d{2}/\d{4}$", travel_date):
+        holiday_types = classes.get_holiday_types()
+        themes = classes.get_themes()
         return render_template(
             "new_report.html",
             error="Please use format MM/YYYY.",
             title=title,
             description=description,
             country=country,
-            travel_date=travel_date
+            travel_date=travel_date,
+            holiday_types=holiday_types,
+            themes=themes
         )
 
-    # Check sensible month
+    # Check sensible months
     month, year = travel_date.split("/")
     if not (1 <= int(month) <= 12):
+        holiday_types = classes.get_holiday_types()
+        themes = classes.get_themes()
         return render_template(
             "new_report.html",
             error="Month must be between 01 and 12.",
             title=title,
             description=description,
             country=country,
-            travel_date=travel_date
+            travel_date=travel_date,
+            holiday_types=holiday_types,
+            themes=themes
         )
 
-    # Save report
-    reports.add_report(username, title, description, travel_date, country)
+    # Save and add report
+    report_id = reports.add_report(username, title, description, travel_date, country, section, theme)
+
+    # Save uploaded images
+    if "images" in request.files:
+        files = request.files.getlist("images")
+        for file in files[:5]:  # max 5 pics
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                # TODO: later save the file name in the database with report_id
+
     return redirect("/")
 
-@app.route("/report/<int:report_id>")
-def show_report(report_id):
-    report = reports.get_report(report_id)
+@app.route("/uploads/<filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+@app.route("/report/<int:id>", methods=["GET", "POST"])
+def report_page(id):
+    if request.method == "POST":
+        if "username" not in session:
+            return redirect("/login")
+        content = request.form["content"].strip()
+        if content:
+            db.add_comment(id, session["username"], content)
+        return redirect(f"/report/{id}")
+
+    report = reports.get_report(id)
     if not report:
         return "Report not found", 404
-    return render_template("show_report.html", report=report)
+
+    all_comments = comments.get_comments(id)
+    images = reports.get_images(id) 
+    return render_template("show_report.html", report=report, comments=all_comments, images=images)
 
 #shows edit report sheet
 @app.route("/report/<int:report_id>/edit")
@@ -98,7 +172,25 @@ def edit_report(report_id):
     if report["username"] != session.get("username"):
         return "Unauthorized", 403
 
-    return render_template("edit_report.html", report=report)
+    holiday_types = classes.get_holiday_types()
+    themes = classes.get_themes()
+    images = reports.get_images(report_id)  
+    
+    return render_template(
+        "edit_report.html",
+        report=report,
+        holiday_types=holiday_types,
+        themes=themes,
+        images=images
+    )
+
+@app.route("/image/<int:image_id>/delete")
+def delete_image(image_id):
+    if "username" not in session:
+        return redirect("/login")
+    reports.delete_image(image_id, session["username"])
+    flash("Image deleted.")
+    return redirect(request.referrer or "/")
 
 #updates edited report
 @app.route("/report/<int:report_id>/update", methods=["POST"])
@@ -109,13 +201,29 @@ def update_report(report_id):
     if report["username"] != session.get("username"):
         return "Unauthorized", 403
 
-    title = request.form["title"]
-    description = request.form["description"]
-    travel_date = request.form["travel_date"]
-    country = request.form["country"]
+    title        = request.form.get("title", "").strip()
+    description  = request.form.get("description", "").strip()
+    travel_date  = request.form.get("travel_date", "").strip()
+    country      = request.form.get("country", "").strip()
+    section      = request.form.get("section", "").strip()
+    theme        = request.form.get("theme", "").strip()
 
-    reports.update_report(report_id, title, description, travel_date, country)
+    reports.update_report(report_id, title, description, travel_date, country, section, theme)
+
+    if "images" in request.files:
+        files = request.files.getlist("images")
+        for file in files[:5]:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+                db.execute(
+                    "INSERT INTO report_images (report_id, filename) VALUES (?, ?)",
+                    [report_id, filename]
+                )
+
     return redirect(f"/report/{report_id}")
+
 
 #delete report
 @app.route("/report/<int:report_id>/delete")
@@ -126,7 +234,8 @@ def delete_report(report_id):
     if report["username"] != session.get("username"):
         return "Unauthorized", 403
 
-    reports.delete_report(report_id)
+    reports.delete_report(report_id, session["username"])
+
     return redirect("/")
 
 @app.route("/user/<username>")
@@ -166,41 +275,32 @@ def create():
         return render_template("register.html", error="Password must be at least 4 characters.")    
     if password1 != password2:
         return render_template("register.html", error="Passwords do not match, try again.")
-    try:
-        sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)"
-        password_hash = generate_password_hash(password1)
-        db.execute(sql, [username, password_hash])
-    except sqlite3.IntegrityError:
+
+    success = users.add_user(username, password1)
+    if not success:
         return render_template("register.html", error="The username is already taken, try another.")
 
-    return render_template("success.html")
+    return redirect("/login")
 
 #login
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
         return render_template("login.html")
- #   if request.method == "POST":
-    username = request.form["username"]
-    password = request.form["password"]
-        
-    if not username or not password:
+
+    # POST
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "")
+
+    if not username or not password:    
+        # render error; request.form remains -> field is prefilled in template
         return render_template("login.html", error="Fill in all fields please")
 
-    if not username or not password:
-        return render_template("login.html", error="Fill in all fields please")
+    if not users.verify_login(username, password):
+        return render_template("login.html", error="Invalid username or password")
 
-    result = db.query("SELECT password_hash FROM users WHERE username = ?", [username])
-    if not result:
-        return render_template("login.html", error="Username cannot be found")
-
-    password_hash = result[0]["password_hash"]
-        
-    if check_password_hash(password_hash, password):
-        session["username"] = username
-        return redirect("/")
-    else:
-        return render_template("login.html", error="Wrong username or password.")
+    session["username"] = username
+    return redirect("/")
 
 #logout
 @app.route("/logout")
@@ -208,3 +308,23 @@ def logout():
     del session["username"]
     flash("You have successfully signed out of")
     return redirect("/")
+
+#delete comment
+@app.route("/comment/<int:comment_id>/delete")
+def delete_comment(comment_id):
+    if "username" not in session:
+        return redirect("/login")
+    comments.delete_comment(comment_id, session["username"])
+    flash("Comment deleted.")
+    return redirect(request.referrer or "/")
+
+#find comments
+@app.route("/my_comments")
+def my_comments():
+    if "username" not in session:
+        return redirect("/login")
+
+    username = session["username"]
+    user_comments = comments.get_comments_by_user(username)
+    return render_template("my_comments.html", comments=user_comments)
+

@@ -3,7 +3,7 @@ CREATE TABLE users (
     username TEXT UNIQUE,
     password_hash TEXT
 );
--- Tämä luo taulun new_reportiin
+-- This will create a table in new_report
 CREATE TABLE items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -15,10 +15,45 @@ CREATE TABLE items (
 
 CREATE TABLE reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- automatically saves date and time of when row was created --
-    country TEXT,
+    username    TEXT NOT NULL,
+    title       TEXT NOT NULL,
+    description TEXT NOT NULL,
+    travel_date TEXT NOT NULL,
+    country     TEXT,
+    section     TEXT,
+    theme       TEXT,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,-- automatically saves date and time of when row was created --
     FOREIGN KEY(username) REFERENCES users(username)
+);
+
+CREATE TABLE comments (
+    id INTEGER PRIMARY KEY,
+    report_id INTEGER REFERENCES reports(id),
+    username TEXT REFERENCES users(username),
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE report_classes (
+    id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL
+);
+
+CREATE TABLE classes (
+    id INTEGER PRIMARY KEY,
+    title TEXT,
+    value TEXT
+);
+
+CREATE TABLE hotels (
+    id INTEGER PRIMARY KEY,
+    report_id INTEGER REFERENCES reports(id),
+    name TEXT NOT NULL,
+    area TEXT
+);
+
+CREATE TABLE report_images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  report_id INTEGER REFERENCES reports(id),
+  filename TEXT
 );

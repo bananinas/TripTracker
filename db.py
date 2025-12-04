@@ -7,18 +7,35 @@ def get_connection():
     con.row_factory = sqlite3.Row
     return con
 
-def execute(sql, params=[]):
+def execute(sql, params=(), return_lastrowid=False):
     con = get_connection()
-    result = con.execute(sql, params)
+    cur = con.execute(sql, params)
     con.commit()
-    g.last_insert_id = result.lastrowid
+    last_id = cur.lastrowid
     con.close()
 
-def last_insert_id():
-    return g.last_insert_id    
-    
-def query(sql, params=()):
+    if return_lastrowid:
+        return last_id
+
+def query(sql, params=(), one=False):
     con = get_connection()
-    result = con.execute(sql, params).fetchall()
+    cur = con.execute(sql, params)
+
+    if one:
+        row = cur.fetchone()
+        con.close()
+        return row
+
+    rows = cur.fetchall()
     con.close()
-    return result
+    return rows
+
+
+def get_comments(report_id):
+    sql = "SELECT username, content, created_at FROM comments WHERE report_id = ? ORDER BY created_at DESC"
+    return query(sql, [report_id])
+
+def add_comment(report_id, username, content):
+    sql = "INSERT INTO comments (report_id, username, content) VALUES (?, ?, ?)"
+    execute(sql, [report_id, username, content])
+

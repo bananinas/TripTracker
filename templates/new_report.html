@@ -2,32 +2,75 @@
 <html>
 <head>
   <title>New report</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+
 {% if error %}
 <p style="color:red;">{{ error }}</p>
 {% endif %}
 
+<p style="margin-bottom: 10px;">
+  <a href="/">Home</a>
+  {% if session.get('username') %}
+    | <a href="/user/{{ session['username'] }}">My reports</a>
+    | <a href="/new_report">Add report</a>
+    | <a href="/logout">Logout</a>
+  {% else %}
+    | <a href="/login">Login</a>
+    | <a href="/register">Register</a>
+  {% endif %}
+</p>
+<hr>
+
 <h1>New report</h1>
 
-<form action="/create_report" method="post">
-  <p>Country:<br>
-    <input type="text" name="country" value="{{ country or '' }}">
+<form action="/create_report" method="post" enctype="multipart/form-data">
+
+  <p>Country<br>
+    <input type="text" name="country" value="{{ request.form.country or '' }}">
   </p>
 
-  <p>Destination:<br>
-    <input type="text" name="title" value="{{ title or '' }}">
+  <p>Destination *<br>
+    <input type="text" name="title" required value="{{ request.form.title or '' }}">
   </p>
 
-  <p>Description:<br>
-    <textarea name="description" rows="8" cols="60">{{ description or '' }}</textarea>
+  <p>Description *<br>
+    <textarea name="description" rows="8" cols="60" required>{{ request.form.description or '' }}</textarea>
   </p>
 
-  <p>Travel date (MM/YYYY):<br>
-    <input type="text" name="travel_date" value="{{ travel_date or '' }}" placeholder="MM/YYYY" required>
+  <p>Travel date (MM/YYYY) *<br>
+    <input type="text" name="travel_date" required placeholder="MM/YYYY" value="{{ request.form.travel_date or '' }}">
   </p>
 
-  <input type="submit" value="Create report">
+  <p>Holiday type *<br>
+    <select name="section" required>
+      <option value="">(choose)</option>
+      {% for h in holiday_types %}
+        <option value="{{ h.value }}" {% if request.form.section == h.value %}selected{% endif %}>{{ h.value }}</option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>Theme *<br>
+    <select name="theme" required>
+      <option value="">(choose)</option>
+      {% for t in themes %}
+        <option value="{{ t.value }}" {% if request.form.theme == t.value %}selected{% endif %}>{{ t.value }}</option>
+      {% endfor %}
+    </select>
+  </p>
+
+  <p>Images (max 5):<br>
+    <input type="file" name="images" multiple accept="image/*">
+  </p>
+
+  <input type="submit" value="Create report" style="margin-top: 10px;">
+  <input type="button" value="Cancel" onclick="window.location.href='/'">
+
 </form>
+
+<p>* Required fields</p>
+
 </body>
 </html>

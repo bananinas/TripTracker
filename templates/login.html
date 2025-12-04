@@ -3,6 +3,7 @@
 
 <head>
   <title>Login</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
@@ -22,17 +23,20 @@
   <form action="/login" method="post">
     <p>
       Username: <br />
-      <input type="text" name="username" />
+      <input type="text" name="username" value="{{ request.form.username }}">
     </p>
     <p>
       Password: <br />
       <input type="password" name="password" />
     </p>
-    <input type="submit" value="Sign in" />
+    <input type="submit" value="Login" />
   </form>
   {% endif %}
+  
     <p>
     Don't have an account yet? <a href="/register">Register</a>
+  </p>
+  <p>Forgot your password? For now, please contact the site administrator to reset it.
   </p>
 </body>
 
