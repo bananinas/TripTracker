@@ -105,6 +105,7 @@
 
 {% if session.username %}
   <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <textarea name="content" rows="3" cols="60" placeholder="Write a comment..."></textarea><br>
     <input type="submit" value="Send">
   </form>
