@@ -42,12 +42,10 @@ def update_report(report_id, title, description, travel_date, country, section, 
     db.execute(sql, params)
 
 def delete_report(report_id, username):
+    db.execute("DELETE FROM report_images WHERE report_id = ?", [report_id])
+    db.execute("DELETE FROM comments WHERE report_id = ?", [report_id])
     sql = "DELETE FROM reports WHERE id = ? AND username = ?"
     db.execute(sql, [report_id, username])
-
-def get_images(report_id):
-    sql = "SELECT filename FROM report_images WHERE report_id = ?"
-    return db.query(sql, [report_id])
 
 def get_images(report_id):
     sql = "SELECT id, filename FROM report_images WHERE report_id = ?"

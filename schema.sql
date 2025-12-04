@@ -53,7 +53,9 @@ CREATE TABLE hotels (
 );
 
 CREATE TABLE report_images (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  report_id INTEGER REFERENCES reports(id),
-  filename TEXT
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    report_id INTEGER NOT NULL,
+    filename TEXT NOT NULL,
+    FOREIGN KEY (report_id) REFERENCES reports (id)
 );
+

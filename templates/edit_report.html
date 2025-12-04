@@ -55,8 +55,11 @@
 
     <p>Travel date (MM/YYYY) *<br>
       <input type="text" name="travel_date" required placeholder="MM/YYYY"
-             value="{{ request.form.travel_date or report.travel_date }}">
+            pattern="^(0[1-9]|1[0-2])/(19[2-9][0-9]|20[0-9]{2})$"
+            title="Please enter a valid date between 01/1920 and the current year."
+            value="{{ request.form.travel_date or report.travel_date }}">
     </p>
+
 
       {% if holiday_types %}
     <p>Holiday type *<br>
@@ -99,12 +102,12 @@
       </div>
    {% endif %}
 
-    <p>Add images (max 5):<br>
-      <input type="file" name="images" multiple accept="image/*">
-    </p>
     <p>
-      <input type="reset" value="Clear selected files">
+      Images (max 5):<br>
+      <input type="file" name="images" multiple accept=".jpg,.jpeg,.png,.gif">
     </p>
+    <small>You can remove a selected file before submitting using your browser’s file dialog.</small>
+
 
 
     <input type="submit" value="Save changes">
