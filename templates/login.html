@@ -21,6 +21,7 @@
   </p>
   {% else %}
   <form action="/login" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     <p>
       Username: <br />
       <input type="text" name="username" value="{{ request.form.username }}">

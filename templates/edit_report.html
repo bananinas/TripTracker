@@ -35,6 +35,7 @@
   {% endif %}
 
   <form method="post" action="/report/{{ report.id }}/update" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 
     <p>Country:<br>
       <input type="text" name="country"

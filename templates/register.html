@@ -13,6 +13,7 @@
 {% endif %}
 
   <form action="/create" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
     <p>
       Username: <br />
       <input type="text" name="username" />
