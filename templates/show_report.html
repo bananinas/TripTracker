@@ -69,8 +69,8 @@
     <p style="margin-bottom: 12px;"><i>No images uploaded.</i></p>
 
   {% endfor %}
-  </div>
-{% endif %}
+
+  {% endif %}
 <br>
   <p><small>Report added by: {{ report.username }}</small></p>
   {% if session.username == report.username %}
