@@ -30,6 +30,7 @@
   <h1><b>TripTracker</b></h1>
   <p>
     Welcome to get inspired and to inspire others in the world of travel experiences and adventures!
+  
   </p>
 
   {% if session.username %}
@@ -39,6 +40,10 @@
       <a href="/user/{{ session.username }}" style="color: rgb(0, 113, 128); text-decoration: none; font-weight: bold;">
         {{ session.username }}
       </a>.
+    </p>
+
+    <p>
+      Write about your own travel experiences for others to read, and share your thoughts by commenting other peoples experiences. Or why not ask a question to learn more and to get input from other users.
     </p>
 
 
@@ -51,6 +56,8 @@
     </p>
   {% endif %}
 
+
+    
   <!-- here are the list of reports / sign in msg -->
   {% if session.username %}
     <h2>Travel reports</h2>

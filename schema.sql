@@ -3,15 +3,6 @@ CREATE TABLE users (
     username TEXT UNIQUE,
     password_hash TEXT
 );
--- This will create a table in new_report
-CREATE TABLE items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    username TEXT NOT NULL,
-    travel_date TEXT,
-    FOREIGN KEY(username) REFERENCES users(username)
-);
 
 CREATE TABLE reports (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
