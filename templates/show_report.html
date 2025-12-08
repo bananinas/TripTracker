@@ -5,35 +5,7 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<style>
 
-  .description {
-    font-family: "Trebuchet MS", sans-serif;
-    font-size: 1.0em;
-    max-width: 800px;
-    line-height: 1.2;
-    text-align: justify;
-    margin-left: 20px;
-    margin-bottom: 10px;
-  }
-</style>
-
-<style>
-  .comment {
-    font-family: "Trebuchet MS", sans-serif;
-    font-size: 0.9em;
-    color: #333;
-    max-width: 1000px;
-    background-color: #f9f9f9;
-    border-left: 3px solid #ccc;
-    padding: 6px 10px;
-    margin: 6px 0;
-    border-radius: 6px;
-  }
-  .comment small {
-    color: #777;
-  }
-</style>
 
 <style>
   p {
@@ -55,12 +27,23 @@
 </p>
 <hr>
 
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flash-messages">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
   <h2>{{ report.title }}</h2>
   <p>Travelled in {{ report.travel_date }}</p>
+  <br>
   <p><b>Country:</b> {{ report.country }}</p>
-
 <p><b>Holiday type:</b> {{ report.section or "Not specified" }}</p>
 <p><b>Theme:</b> {{ report.theme or "Not specified" }}</p>
+<br>
 
 {% if hotels %}
   <p>Hotels</p>
@@ -78,7 +61,7 @@
 <p class="description">
   {{ report.description | replace('\n', '<br>') | safe }}
 </p>
-
+<br>
   <h4>Images</h4>
   {% for img in images %}
     <img src="/uploads/{{ img.filename }}" alt="Report image" style="max-width:300px; margin:5px;">
@@ -88,7 +71,7 @@
   {% endfor %}
   </div>
 {% endif %}
-
+<br>
   <p><small>Report added by: {{ report.username }}</small></p>
   {% if session.username == report.username %}
   <p>
@@ -114,29 +97,21 @@
 {% endif %}
 
 
-
 {% for c in comments %}
   <div class="comment">
     <small><b>{{ c.username }}</b> ({{ c.created_at }}):</small><br>
     {{ c.content | replace('\n', '<br>') | safe }}
+
     {% if session.username == c.username %}
-      <form action="/comment/{{ c.id }}/delete" method="post" style="display:inline;">
+      <form action="/comment/{{ c.id }}/delete" method="post">
         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-        <button type="submit"
-                style="font-size:0.9em; color:rgb(164, 0, 170); margin-left:10px; background:none; border:none; cursor:pointer;"
-                onclick="return confirm('Delete this comment?');">
-          Delete my comment
-        </button>
+        <input type="submit" value="Delete my comment">
       </form>
     {% endif %}
-
   </div>
 {% else %}
   <p>No comments yet.</p>
 {% endfor %}
-
-&nbsp;
-<p><a href="/">Back to main page</a></p>
 
 </body>
 </html>

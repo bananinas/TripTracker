@@ -5,6 +5,19 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+
+  <p style="margin-bottom: 10px;">
+  <a href="/">Home</a>
+  {% if session.get('username') %}
+    | <a href="/user/{{ session['username'] }}">My reports</a>
+    | <a href="/new_report">Add report</a>
+    | <a href="/logout">Logout</a>
+  {% else %}
+    | <a href="/login">Login</a>
+    | <a href="/register">Register</a>
+  {% endif %}
+  </p>
+
   <h2>My comments</h2>
 
   {% if comments %}
@@ -21,6 +34,5 @@
     <p>You haven’t written any comments yet.</p>
   {% endif %}
 
-  <p><a href="/">Back to main page</a></p>
 </body>
 </html>

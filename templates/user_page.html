@@ -19,6 +19,17 @@
 </p>
 <hr>
 
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flash-messages">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+
 <head>
   <title>User reports</title>
   <style>
@@ -62,8 +73,6 @@
   </p>
 {% endif %}
 
-
-<p><a href="/">Back to main page</a></p>
 
 </body>
 </html>

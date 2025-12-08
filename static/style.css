@@ -1,14 +1,16 @@
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Georgia", "Times New Roman", serif;
   background-color: #f8f9fa;
   color: #333;
   margin: 40px;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 h1, h2, h3 {
+  font-family: "Trebuchet MS", "Lucida Grande", Arial, sans-serif;
   color: #007380;
 }
+
 
 a {
   color: #007380;
@@ -72,4 +74,49 @@ hr {
 .custom-file-upload:hover {
   background-color: #005c66;
 }
+
+.comment form {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  display: inline !important;
+}
+
+.comment input[type="submit"] {
+  background: none !important;
+  border: none !important;
+  color: #777777 !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  font-size: 0.70em !important;
+  margin-left: 6px !important;
+}
+
+.comment input[type="submit"]:hover {
+  color: #333 !important;
+}
+
+.comment {
+  font-size: 0.9em;  
+  line-height: 1.3;
+  color: #444;
+}
+
+.flash-messages {
+  list-style: none;        /* removes bulletpoint */
+  padding: 10px 14px;
+  margin: 12px 0;
+  background-color: #e6fffa;
+  border: 1px solid #87e8de;
+  color: #006d75;
+  border-radius: 6px;
+  font-family: Arial, sans-serif;
+  font-size: 0.95em;
+}
+
+.flash-messages li {
+  margin: 0;
+}
+
 

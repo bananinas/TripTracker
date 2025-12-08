@@ -6,9 +6,15 @@
 </head>
 <body>
 
-{% if error %}
-<p style="color:red;">{{ error }}</p>
-{% endif %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flash-messages">
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
 <p style="margin-bottom: 10px;">
   <a href="/">Home</a>
@@ -41,14 +47,17 @@
   </p>
 
 <p>Travel date (MM/YYYY) *<br>
-  <input type="text" name="travel_date" required placeholder="MM/YYYY"
-         pattern="^(0[1-9]|1[0-2])/(19[2-9][0-9]|20[0-9]{2})$"
-         title="Please enter a valid date between 01/1920 and the current year."
-         value="{{ request.form.travel_date or '' }}">
-  {% if date_error %}
-    <small style="color:red;">{{ date_error }}</small>
-  {% endif %}
+    <input type="text" name="travel_date" required
+          placeholder="MM/YYYY"
+          pattern="^(0[1-9]|1[0-2])/(19[2-9][0-9]|20[0-9]{2})$"
+          title="Please enter a valid date between 01/1920 and {{ current_year }}."
+          value="{{ travel_date or '' }}">
+
+    {% if date_error %}
+      <small style="color:red;">{{ date_error }}</small>
+    {% endif %}
   </p>
+
 
 
   <p>Holiday type *<br>
@@ -69,9 +78,34 @@
     </select>
   </p>
 
-  <p>Add images (max 5):<br>
-    <input type="file" name="images" multiple accept="image/*">
-  </p>
+<p>Add images (optional up to 5):</p>
+
+<div class="image-fields">
+  <label>Image 1:</label>
+  <input type="file" name="images" accept="image/*"><br>
+
+  <label>Image 2:</label>
+  <input type="file" name="images" accept="image/*"><br>
+
+  <label>Image 3:</label>
+  <input type="file" name="images" accept="image/*"><br>
+
+  <label>Image 4:</label>
+  <input type="file" name="images" accept="image/*"><br>
+
+  <label>Image 5:</label>
+  <input type="file" name="images" accept="image/*"><br>
+</div>
+
+<style>
+  .image-fields label {
+    display: inline-block;
+    width: 120px;   /* even outs sides */
+    margin-top: 5px;
+  }
+</style>
+
+
 
   <input type="submit" value="Create report" style="margin-top: 10px;">
   <input type="button" value="Cancel" onclick="window.location.href='/'">

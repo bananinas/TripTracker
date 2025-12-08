@@ -71,7 +71,7 @@ def new_report():
     holiday_types = classes.get_holiday_types()
     themes = classes.get_themes()
 
-    return render_template("new_report.html", holiday_types=holiday_types, themes=themes)
+    return render_template("new_report.html", holiday_types=holiday_types, themes=themes, current_year=datetime.now().year)
 
 @app.route("/create_report", methods=["POST"])
 def create_report():
@@ -81,6 +81,7 @@ def create_report():
     title = request.form.get("title", "").strip()
     if title:
         title = title[0].upper() + title[1:]
+
     description = request.form.get("description", "").strip()
     travel_date = request.form.get("travel_date", "").strip()
     username = session["username"]
@@ -88,54 +89,80 @@ def create_report():
     section = request.form.get("section", "").strip()
     theme = request.form.get("theme", "").strip()
 
+    holiday_types = classes.get_holiday_types()
+    themes = classes.get_themes()
+
     if not title or not description or not travel_date or not section or not theme:
-        holiday_types = classes.get_holiday_types()
-        themes = classes.get_themes()
-        return render_template("new_report.html",
-            error="Please fill in all fields.",
-            title=title, description=description, country=country,
-            travel_date=travel_date, holiday_types=holiday_types, themes=themes
+        flash("Please fill in all required fields.")
+        return render_template(
+            "new_report.html",
+            holiday_types=holiday_types,
+            themes=themes,
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date,
+            current_year=datetime.now().year
+
         )
 
-    # Date validation (MM/YYYY)
     if not re.match(r"^\d{2}/\d{4}$", travel_date):
-        holiday_types = classes.get_holiday_types()
-        themes = classes.get_themes()
-        return render_template("new_report.html",
-            date_error="Please use format MM/YYYY.",
-            title=title, description=description, country=country,
-            travel_date=travel_date, holiday_types=holiday_types, themes=themes
+        flash("Please use format MM/YYYY.")
+        return render_template(
+            "new_report.html",
+            holiday_types=holiday_types,
+            themes=themes,
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date,
+            current_year=datetime.now().year
+
         )
 
     month, year = travel_date.split("/")
+
     if not (1 <= int(month) <= 12):
-        holiday_types = classes.get_holiday_types()
-        themes = classes.get_themes()
-        return render_template("new_report.html",
+        return render_template(
+            "new_report.html",
+            holiday_types=holiday_types,
+            themes=themes,
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date,
             date_error="Month must be between 01 and 12.",
-            title=title, description=description, country=country,
-            travel_date=travel_date, holiday_types=holiday_types, themes=themes
+            current_year=datetime.now().year
         )
 
     current_year = datetime.now().year
-    year_int = int(year)
-    if year_int < 1920 or year_int > current_year:
-        holiday_types = classes.get_holiday_types()
-        themes = classes.get_themes()
-        return render_template("new_report.html",
+    if int(year) < 1920 or int(year) > current_year:
+        return render_template(
+            "new_report.html",
+            holiday_types=holiday_types,
+            themes=themes,
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date,
             date_error=f"Year must be between 1920 and {current_year}.",
-            title=title, description=description, country=country,
-            travel_date=travel_date, holiday_types=holiday_types, themes=themes
+            current_year=current_year
         )
 
-    report_id = reports.add_report(username, title, description, travel_date, country, section, theme)
 
     if "images" in request.files:
-        files = request.files.getlist("images")
-        for file in files[:5]:
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+        images = request.files.getlist("images")
+        for image in images[:5]:
+            if image and allowed_file(image.filename):
+                filename = secure_filename(image.filename)
+                path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                image.save(path)
+
+                db.execute(
+                    "INSERT INTO report_images (report_id, filename) VALUES (?, ?)",
+                    [report_id, filename]
+                )
+
     return redirect(f"/report/{report_id}")
 
 @app.route("/uploads/<filename>")
@@ -175,15 +202,16 @@ def edit_report(report_id):
     themes = classes.get_themes()
     images = reports.get_images(report_id)
 
-    return render_template("edit_report.html", report=report,
-        holiday_types=holiday_types, themes=themes, images=images)
+    return render_template(
+        "edit_report.html", report=report, holiday_types=holiday_types, themes=themes, images=images, current_year=datetime.now().year
+    )
 
 @app.route("/image/<int:image_id>/delete")
 def delete_image(image_id):
     if "username" not in session:
         return redirect("/login")
+
     reports.delete_image(image_id, session["username"])
-    flash("Image deleted.")
     return redirect(request.referrer or "/")
 
 # update report
@@ -201,29 +229,55 @@ def update_report(report_id):
     title = request.form.get("title", "").strip()
     if title:
         title = title[0].upper() + title[1:]
+
     description = request.form.get("description", "").strip()
     travel_date = request.form.get("travel_date", "").strip()
     country = request.form.get("country", "").strip().title()
     section = request.form.get("section", "").strip()
     theme = request.form.get("theme", "").strip()
 
-    # Date validation with flash instead of red text
+    holiday_types = classes.get_holiday_types()
+    themes = classes.get_themes()
+    images = reports.get_images(report_id)
+
+    # no flash
     if not re.match(r"^\d{2}/\d{4}$", travel_date):
-        flash("Please use format MM/YYYY.")
-        return redirect(request.referrer or f"/report/{report_id}/edit")
+        return render_template(
+            "edit_report.html",
+            report=report,
+            holiday_types=holiday_types,
+            themes=themes,
+            images=images,
+            current_year=datetime.now().year,
+            date_error="Please use format MM/YYYY."
+        )
 
     month, year = travel_date.split("/")
+
     if not (1 <= int(month) <= 12):
-        flash("Month must be between 01 and 12.")
-        return redirect(request.referrer or f"/report/{report_id}/edit")
+        return render_template(
+            "edit_report.html",
+            report=report,
+            holiday_types=holiday_types,
+            themes=themes,
+            images=images,
+            current_year=datetime.now().year,
+            date_error="Month must be between 01 and 12."
+        )
 
     current_year = datetime.now().year
-    year_int = int(year)
-    if year_int < 1920 or year_int > current_year:
-        flash(f"Year must be between 1920 and {current_year}.")
-        return redirect(request.referrer or f"/report/{report_id}/edit")
+    if int(year) < 1920 or int(year) > current_year:
+        return render_template(
+            "edit_report.html",
+            report=report,
+            holiday_types=holiday_types,
+            themes=themes,
+            images=images,
+            current_year=current_year,
+            date_error=f"Year must be between 1920 and {current_year}."
+        )
 
-    # if everything is fine, update report normally
+    # all okay check -> update
     reports.update_report(report_id, title, description, travel_date, country, section, theme)
 
     if "images" in request.files:
@@ -232,6 +286,7 @@ def update_report(report_id):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
                 db.execute(
                     "INSERT INTO report_images (report_id, filename) VALUES (?, ?)",
                     [report_id, filename]
@@ -243,13 +298,18 @@ def update_report(report_id):
 # delete report
 @app.route("/report/<int:report_id>/delete")
 def delete_report(report_id):
+    if "username" not in session:
+        return redirect("/login")
     report = reports.get_report(report_id)
     if not report:
         return "Report not found", 404
     if report["username"] != session.get("username"):
         return "Unauthorized", 403
     reports.delete_report(report_id, session["username"])
-    return redirect("/")
+
+    flash("Report deleted successfully.")
+    return redirect(f"/user/{session['username']}")
+
 
 @app.route("/user/<username>")
 def user_page(username):
@@ -325,4 +385,6 @@ def my_comments():
 
     username = session["username"]
     user_comments = comments.get_comments_by_user(username)
+
     return render_template("my_comments.html", comments=user_comments)
+
