@@ -95,7 +95,7 @@ def create_report():
     current_year = datetime.now().year
     countries = classes.get_countries()
 
-    # 1. empty must fields
+    # empty must fields
     if not title or not description or not travel_date or not section or not theme:
         flash("Please fill in all required fields.")
         return render_template(
@@ -111,7 +111,7 @@ def create_report():
             date_error="Please use format MM/YYYY."
         )
 
-    # 2.  MM/YYYY
+    # MM/YYYY
     if not re.match(r"^\d{2}/\d{4}$", travel_date):
         return render_template(
             "new_report.html",
@@ -128,7 +128,7 @@ def create_report():
 
     month, year = travel_date.split("/")
 
-    # 3. wrong month
+    # wrong month
     if not (1 <= int(month) <= 12):
         return render_template(
             "new_report.html",
@@ -143,7 +143,7 @@ def create_report():
             date_error="Month must be between 01 and 12."
             )
 
-    # 4. wrong year
+    # wrong year
     if int(year) < 1920 or int(year) > current_year:
         return render_template(
             "new_report.html",
@@ -158,10 +158,10 @@ def create_report():
             date_error=f"Year must be between 1920 and {current_year}."
             )
 
-    # 5. create repor_id    
+    # create repor_id    
     report_id = reports.add_report(username, title, description, travel_date, country, section, theme)
     
-    #  6. add pics
+    # add pics
     if "images" in request.files:
         images = request.files.getlist("images")
         for image in images[:5]:

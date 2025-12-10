@@ -52,7 +52,6 @@ def get_images(report_id):
     return db.query(sql, [report_id])
 
 def delete_image(image_id, username):
-    # check that report belongs to user where pic is located
     sql = """
         DELETE FROM report_images
         WHERE id = ?

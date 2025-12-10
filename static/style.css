@@ -13,7 +13,7 @@ h1, h2, h3 {
 
 
 a {
-  color: #007380;
+  color: #005a63;
   text-decoration: none;
 }
 
@@ -45,7 +45,7 @@ input[type="text"], input[type="password"], textarea, select {
 }
 
 input[type="submit"], input[type="button"] {
-  background-color: #007380;
+  background-color: #006069;
   color: white;
   border: none;
   padding: 8px 14px;
@@ -107,9 +107,9 @@ hr {
   list-style: none;        /* removes bulletpoint */
   padding: 10px 14px;
   margin: 12px 0;
-  background-color: #e6fffa;
-  border: 1px solid #13443f;
-  color: #006d75;
+  background-color: #d9f3f1;
+  border: 1px solid #004e54;
+  color: #003f44;
   border-radius: 6px;
   font-family: Arial, sans-serif;
   font-size: 0.95em;
@@ -119,4 +119,46 @@ hr {
   margin: 0;
 }
 
+@media (max-width: 700px) {
+
+  body {
+    margin: 16px;
+    font-size: 1rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  form {
+    max-width: 100%;
+    padding: 12px;
+  }
+
+  textarea {
+    font-size: 1rem;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  textarea,
+  select {
+    font-size: 1rem;
+  }
+
+  input[type="submit"],
+  input[type="button"] {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+}
 

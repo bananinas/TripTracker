@@ -13,7 +13,7 @@ CREATE TABLE reports (
     country     TEXT,
     section     TEXT,
     theme       TEXT,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,-- automatically saves date and time of when row was created --
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(username) REFERENCES users(username)
 );
 
@@ -51,9 +51,6 @@ CREATE TABLE report_images (
 );
 
 CREATE TABLE countries (
-    code TEXT PRIMARY KEY,   -- eg "FI"
-    name TEXT NOT NULL       -- eg "Finland"
+    code TEXT PRIMARY KEY,
+    name TEXT NOT NULL 
 );
-
-
-
