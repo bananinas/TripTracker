@@ -1,30 +1,38 @@
 # TripTracker
 A simple app to log and share travel experiences.
 
-- Käyttäjä pystyy luomaan tunnuksen ja kirjautumaan sisään sovellukseen.
-- Käyttäjä pystyy lisäämään sovellukseen matkakuvauksia. Lisäksi käyttäjä pystyy muokkaamaan ja poistamaan lisäämiään matkakuvauksia.
-- Käyttäjä näkee sovellukseen lisätyt matkakuvaukset. Käyttäjä näkee sekä itse lisäämänsä että muiden käyttäjien lisäämät matkakuvaukset.
-- Käyttäjä pystyy etsimään matkakuvauksia hakusanalla tai muulla perusteella. Käyttäjä pystyy hakemaan sekä itse lisäämiään että muiden käyttäjien lisäämiä matkakuvauksia.
-- Sovelluksessa on käyttäjäsivut, jotka näyttävät jokaisesta käyttäjästä tilastoja ja käyttäjän lisäämät matkakuvaukset.
-- Käyttäjä pystyy valitsemaan tietokohteelle yhden tai useamman luokittelun (esim. kohdemaan, -kaupungin, matkustustapa, matkan ajankohta). Luokat ovat valmiina tietokannassa.
-- Käyttäjä pystyy kommentoimaan muiden matkakuvauksia.
+- Users can create an account and log in.
+- Users can add travel reports, and edit or delete their own reports.
+- Users can view all travel reports added by themselves and other users.
+- Users can search travel reports by keyword or other criteria.
+- The application has user pages that show statistics and all reports created by each user.
+- Users can classify each travel report using predefined classifications (such as country, holiday type and theme).
+- Users can comment on other users’ travel reports.
 
-## Sovelluksen asennus
+## Installation
 
-Asenna ```flask``` -kirjasto:
+Install Flask:
 
 ```
 $ pip install Flask
 ```
 
-Luo tietokannan taulut ja lisää alkutiedot:
+Create the database tables and insert initial data:
 
 ```
 $ sqlite3 database.db < schema.sql
 ```
 
-Voit käynnistää sovelluksen näin:
+Run the application:
 
 ```
 $ flask run
 ```
+
+## Pylint
+
+Pylint was run with:
+
+pylint app.py
+
+Score: 8.24 / 10
