@@ -29,6 +29,10 @@ Run the application:
 $ flask run
 ```
 
+To improve performance when handling larger datasets, a database index was added to the reports table.
+The following index is used:
+CREATE INDEX idx_reports_country ON reports(country);
+
 ## Pylint
 
 Pylint was run with:
@@ -36,3 +40,10 @@ Pylint was run with:
 pylint app.py
 
 Score: 8.24 / 10
+
+Most warnings were related to:
+- Missing docstrings
+- Line length limits
+- Import order
+
+The report file is included in the repository as `pylint_report.txt`.
