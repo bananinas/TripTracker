@@ -48,10 +48,18 @@
   <form method="post" action="/report/{{ report.id }}/update" enctype="multipart/form-data">
     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 
-    <p>Country:<br>
-      <input type="text" name="country"
-             value="{{ request.form.country or report.country }}">
+    <p>Country<br>
+      <select name="country" required>
+        <option value="">(choose)</option>
+        {% for c in countries %}
+          <option value="{{ c.name }}"
+            {% if (request.form.country or report.country) == c.name %}selected{% endif %}>
+            {{ c.name }}
+          </option>
+        {% endfor %}
+      </select>
     </p>
+
 
     <p>Destination *<br>
       <input type="text" name="title" required
@@ -120,7 +128,7 @@
     {% set slots = max_allowed - existing %}
 
     {% if slots > 0 %}
-      <h4>Add new images (you can add {{ slots }} more):</h4>
+      <h4>Add new images (max.5 in total):</h4>
 
       <div class="image-fields">
         {% for i in range(slots) %}

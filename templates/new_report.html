@@ -35,7 +35,16 @@
     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
 
   <p>Country<br>
-    <input type="text" name="country" value="{{ request.form.country or '' }}">
+    <select name="country" required>
+      <option value="">(choose)</option>
+      {% for c in countries %}
+        <option value="{{ c.name }}"
+          {% if (request.form.country or country) == c.name %}selected{% endif %}>
+          {{ c.name }}
+        </option>
+      {% endfor %}
+    </select>
+
   </p>
 
   <p>Destination *<br>
@@ -78,7 +87,7 @@
     </select>
   </p>
 
-<p>Add images (optional up to 5):</p>
+<p>Add images (max.5 in total):</p>
 
 <div class="image-fields">
   <label>Image 1:</label>

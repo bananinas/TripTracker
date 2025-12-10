@@ -50,3 +50,10 @@ CREATE TABLE report_images (
     FOREIGN KEY (report_id) REFERENCES reports (id)
 );
 
+CREATE TABLE countries (
+    code TEXT PRIMARY KEY,   -- eg "FI"
+    name TEXT NOT NULL       -- eg "Finland"
+);
+
+
+

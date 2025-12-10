@@ -70,8 +70,9 @@ def new_report():
 
     holiday_types = classes.get_holiday_types()
     themes = classes.get_themes()
+    countries = classes.get_countries()
 
-    return render_template("new_report.html", holiday_types=holiday_types, themes=themes, current_year=datetime.now().year)
+    return render_template("new_report.html", holiday_types=holiday_types, themes=themes, countries=countries, current_year=datetime.now().year)
 
 @app.route("/create_report", methods=["POST"])
 def create_report():
@@ -85,13 +86,14 @@ def create_report():
     description = request.form.get("description", "").strip()
     travel_date = request.form.get("travel_date", "").strip()
     username = session["username"]
-    country = request.form.get("country", "").strip().title()
+    country = request.form.get("country", "").strip()
     section = request.form.get("section", "").strip()
     theme = request.form.get("theme", "").strip()
 
     holiday_types = classes.get_holiday_types()
     themes = classes.get_themes()
     current_year = datetime.now().year
+    countries = classes.get_countries()
 
     # 1. empty must fields
     if not title or not description or not travel_date or not section or not theme:
@@ -100,12 +102,14 @@ def create_report():
             "new_report.html",
             holiday_types=holiday_types,
             themes=themes,
+            countries=countries,
             title=title,
             description=description,
             country=country,
             travel_date=travel_date,
-            current_year=current_year
-            )
+            current_year=current_year,
+            date_error="Please use format MM/YYYY."
+        )
 
     # 2.  MM/YYYY
     if not re.match(r"^\d{2}/\d{4}$", travel_date):
@@ -113,22 +117,24 @@ def create_report():
             "new_report.html",
             holiday_types=holiday_types,
             themes=themes,
+            countries=countries,
             title=title,
             description=description,
             country=country,
             travel_date=travel_date,
             current_year=current_year,
             date_error="Please use format MM/YYYY."
-            )
+        )
 
     month, year = travel_date.split("/")
 
-    # 3. month
+    # 3. wrong month
     if not (1 <= int(month) <= 12):
         return render_template(
             "new_report.html",
             holiday_types=holiday_types,
             themes=themes,
+            countries=countries,
             title=title,
             description=description,
             country=country,
@@ -137,12 +143,13 @@ def create_report():
             date_error="Month must be between 01 and 12."
             )
 
-    # 4. year
+    # 4. wrong year
     if int(year) < 1920 or int(year) > current_year:
         return render_template(
             "new_report.html",
             holiday_types=holiday_types,
             themes=themes,
+            countries=countries,
             title=title,
             description=description,
             country=country,
@@ -206,9 +213,10 @@ def edit_report(report_id):
     holiday_types = classes.get_holiday_types()
     themes = classes.get_themes()
     images = reports.get_images(report_id)
+    countries = classes.get_countries()
 
     return render_template(
-        "edit_report.html", report=report, holiday_types=holiday_types, themes=themes, images=images, current_year=datetime.now().year
+        "edit_report.html", report=report, holiday_types=holiday_types, themes=themes, images=images, countries=countries, current_year=datetime.now().year
     )
 
 @app.route("/image/<int:image_id>/delete")
@@ -237,13 +245,14 @@ def update_report(report_id):
 
     description = request.form.get("description", "").strip()
     travel_date = request.form.get("travel_date", "").strip()
-    country = request.form.get("country", "").strip().title()
+    country = request.form.get("country", "").strip()
     section = request.form.get("section", "").strip()
     theme = request.form.get("theme", "").strip()
 
     holiday_types = classes.get_holiday_types()
     themes = classes.get_themes()
     images = reports.get_images(report_id)
+    countries = classes.get_countries()
 
     # no flash
     if not re.match(r"^\d{2}/\d{4}$", travel_date):
@@ -252,6 +261,7 @@ def update_report(report_id):
             report=report,
             holiday_types=holiday_types,
             themes=themes,
+            countries=countries,
             images=images,
             current_year=datetime.now().year,
             date_error="Please use format MM/YYYY."
@@ -265,6 +275,7 @@ def update_report(report_id):
             report=report,
             holiday_types=holiday_types,
             themes=themes,
+            countries=countries,
             images=images,
             current_year=datetime.now().year,
             date_error="Month must be between 01 and 12."
@@ -277,6 +288,7 @@ def update_report(report_id):
             report=report,
             holiday_types=holiday_types,
             themes=themes,
+            countries=countries,
             images=images,
             current_year=current_year,
             date_error=f"Year must be between 1920 and {current_year}."
