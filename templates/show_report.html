@@ -73,11 +73,14 @@
   {% endif %}
 <br>
   <p><small>Report added by: {{ report.username }}</small></p>
-  {% if session.username == report.username %}
+  {% if session.get('username') == report.username %}
   <p>
 <br>
     <a href="/report/{{ report.id }}/edit">Edit report</a> |
-    <a href="/report/{{ report.id }}/delete" onclick="return confirm('Are you sure you want to delete this report?');"> Delete report</a>
+<form method="post" action="/report/{{ report.id }}/delete">
+  <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+  <button type="submit">Delete report</button>
+</form>
   </p>
 <br>
 
@@ -102,7 +105,7 @@
     <small><b>{{ c.username }}</b> ({{ c.created_at }}):</small><br>
     {{ c.content | replace('\n', '<br>') | safe }}
 
-    {% if session.username == c.username %}
+    {% if session.get('username') == c.username %}
       <form action="/comment/{{ c.id }}/delete" method="post">
         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
         <input type="submit" value="Delete my comment">

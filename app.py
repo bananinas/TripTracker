@@ -21,8 +21,15 @@ def require_login():
         flash("Please log in to continue.")
         return redirect("/login")
 
+@app.before_request
+def ensure_csrf_token():
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_hex(16)
+
 def check_csrf():
-    if request.form["csrf_token"] != session["csrf_token"]:
+    token_form = request.form.get("csrf_token")
+    token_session = session.get("csrf_token")
+    if not token_form or not token_session or token_form != token_session:
         abort(403)
 
 # Pic settings
@@ -76,7 +83,9 @@ def new_report():
 
 @app.route("/create_report", methods=["POST"])
 def create_report():
-    require_login()
+    res = require_login()
+    if res:
+        return res
     check_csrf()
 
     title = request.form.get("title", "").strip()
@@ -158,6 +167,21 @@ def create_report():
             date_error=f"Year must be between 1920 and {current_year}."
             )
 
+    current_month = datetime.now().month
+    if int(year) == current_year and int(month) > current_month:
+        return render_template(
+            "new_report.html",
+            holiday_types=holiday_types,
+            themes=themes,
+            countries=countries,
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date,
+            current_year=current_year,
+            date_error="Travel date cannot be in the future."
+        )
+
     # create repor_id    
     report_id = reports.add_report(username, title, description, travel_date, country, section, theme)
     
@@ -184,11 +208,12 @@ def uploaded_file(filename):
 @app.route("/report/<int:id>", methods=["GET", "POST"])
 def report_page(id):
     if request.method == "POST":
-        require_login()
+        res = require_login()
+        if res:
+            return res
         check_csrf()
-        if "username" not in session:
-            return redirect("/login")
         content = request.form["content"].strip()
+
         if content:
             db.add_comment(id, session["username"], content)
         return redirect(f"/report/{id}")
@@ -219,18 +244,21 @@ def edit_report(report_id):
         "edit_report.html", report=report, holiday_types=holiday_types, themes=themes, images=images, countries=countries, current_year=datetime.now().year
     )
 
-@app.route("/image/<int:image_id>/delete")
+@app.route("/image/<int:image_id>/delete", methods=["POST"])
 def delete_image(image_id):
-    if "username" not in session:
-        return redirect("/login")
-
+    res = require_login()
+    if res:
+        return res
+    check_csrf()
     reports.delete_image(image_id, session["username"])
     return redirect(request.referrer or "/")
 
 # update report
 @app.route("/report/<int:report_id>/update", methods=["POST"])
 def update_report(report_id):
-    require_login()
+    res = require_login()
+    if res:
+        return res
     check_csrf()
 
     report = reports.get_report(report_id)
@@ -293,6 +321,21 @@ def update_report(report_id):
             current_year=current_year,
             date_error=f"Year must be between 1920 and {current_year}."
         )
+    current_month = datetime.now().month
+    if int(year) == current_year and int(month) > current_month:
+        return render_template(
+            "new_report.html",
+            holiday_types=holiday_types,
+            themes=themes,
+            countries=countries,
+            title=title,
+            description=description,
+            country=country,
+            travel_date=travel_date,
+            current_year=current_year,
+            date_error="Travel date cannot be in the future."
+        )
+
 
     # all okay check -> update
     reports.update_report(report_id, title, description, travel_date, country, section, theme)
@@ -313,20 +356,20 @@ def update_report(report_id):
     return redirect(f"/report/{report_id}")
 
 # delete report
-@app.route("/report/<int:report_id>/delete")
+@app.route("/report/<int:report_id>/delete", methods=["POST"])
 def delete_report(report_id):
-    if "username" not in session:
-        return redirect("/login")
+    res = require_login()
+    if res:
+        return res
+    check_csrf()
     report = reports.get_report(report_id)
     if not report:
         return "Report not found", 404
     if report["username"] != session.get("username"):
         return "Unauthorized", 403
     reports.delete_report(report_id, session["username"])
-
     flash("Report deleted successfully.")
     return redirect(f"/user/{session['username']}")
-
 
 @app.route("/user/<username>")
 def user_page(username):
@@ -378,7 +421,6 @@ def login():
         return render_template("login.html", error="Invalid username or password")
 
     session["username"] = username
-    session["csrf_token"] = secrets.token_hex(16)
     return redirect("/")
 
 @app.route("/logout")
@@ -389,8 +431,11 @@ def logout():
 
 @app.route("/comment/<int:comment_id>/delete", methods=["POST"])
 def delete_comment(comment_id):
-    require_login()
+    res = require_login()
+    if res:
+        return res
     check_csrf()
+
     comments.delete_comment(comment_id, session["username"])
     flash("Comment deleted.")
     return redirect(request.referrer or "/")
