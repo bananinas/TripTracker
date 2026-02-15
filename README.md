@@ -1,5 +1,6 @@
 # TripTracker
-A simple app to log and share travel experiences.
+A siweb application for users to be able to log, classify and share their travel experiences. 
+
 
 - Users can create an account and log in.
 - Users can add travel reports, and edit or delete their own reports.
@@ -11,9 +12,11 @@ A simple app to log and share travel experiences.
 
 ## Installation
 
-Install Flask:
+Create and activate a virtual environment, then install Flask:
 
 ```
+$ python3 -m venv venv
+$ source venv/bin/activate
 $ pip install Flask
 ```
 
@@ -21,6 +24,12 @@ Create the database tables and insert initial data:
 
 ```
 $ sqlite3 database.db < schema.sql
+$ sqlite3 database.db < init.sql
+$ sqlite3 database.db < countries.sql
+```
+
+The init.sql file inserts default classifications (holiday types and themes).  
+The countries.sql file inserts the list of available countries.
 ```
 
 Run the application:
