@@ -1,46 +1,49 @@
 # TripTracker
-A siweb application for users to be able to log, classify and share their travel experiences. 
+TripTracker is a web application for users to be able to log, classify and share their travel experiences. 
 
+## Features
 
 - Users can create an account and log in.
-- Users can add travel reports, and edit or delete their own reports.
-- Users can view all travel reports added by themselves and other users.
-- Users can search travel reports by keyword or other criteria.
-- The application has user pages that show statistics and all reports created by each user.
-- Users can classify each travel report using predefined classifications (such as country, holiday type and theme).
+- Users can add travel reports and edit or delete their own reports.
+- Users can browse all reports created by all users.
+- Users can search reports by keyword (country or destination).
+- Each user has a user page showing their reports and basic statistics.
+- Reports can be classified using predefined values (country, holiday type, theme).
 - Users can comment on other users’ travel reports.
+- Users can upload up to 5 images per report.
 
 ## Installation
 
-Create and activate a virtual environment, then install Flask:
+Create and activate a virtual environment:
 
 ```
-$ python3 -m venv venv
-$ source venv/bin/activate
-$ pip install Flask
+python3 -m venv venv
+source venv/bin/activate
+pip install Flask
 ```
 
 Create the database tables and insert initial data:
 
 ```
-$ sqlite3 database.db < schema.sql
-$ sqlite3 database.db < init.sql
-$ sqlite3 database.db < countries.sql
+sqlite3 database.db < schema.sql
+sqlite3 database.db < init.sql
+sqlite3 database.db < countries.sql
 ```
 
 The init.sql file inserts default classifications (holiday types and themes).  
-The countries.sql file inserts the list of available countries.
-```
+
 
 Run the application:
 
 ```
-$ flask run
+flask run
 ```
 
 To improve performance when handling larger datasets, a database index was added to the reports table.
 The following index is used:
+```sql
 CREATE INDEX idx_reports_country ON reports(country);
+```
 
 ## Pylint
 

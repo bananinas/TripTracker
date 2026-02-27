@@ -17,8 +17,6 @@
   {% endif %}
 {% endwith %}
 
-
-
   <p style="margin-bottom: 10px;">
   <a href="/">Home</a>
   {% if session.get('username') %}
@@ -53,7 +51,7 @@
       <option value="">No country selected</option>
       {% for c in countries %}
         <option value="{{ c.name }}"
-          {% if (request.form.country or country) == c.name %}selected{% endif %}>
+          {% if (request.form.country or report.country) == c.name %}selected{% endif %}>
           {{ c.name }}
         </option>
       {% endfor %}
@@ -109,21 +107,25 @@
     </p>
   {% endif %}
 
+    <hr>
+
     {% if images %}
       <h4>Existing images</h4>
-      <div>
+
+      <div class="existing-images">
         {% for img in images %}
-          <img src="/uploads/{{ img.filename }}" style="max-width:150px; margin:5px;">
-          <form method="post" action="/image/{{ img.id }}/delete" style="display:inline;"
-              onsubmit="return confirm('Delete this image?');">
-          <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-          <button type="submit">Delete</button>
-        </form><br>
+          <div class="image-card">
+            <img src="/uploads/{{ img.filename }}" alt="Report image">
+            <button type="submit"
+                    formaction="/image/{{ img.id }}/delete"
+                    formmethod="post"
+                    onclick="return confirm('Delete this image?');">
+              Delete
+            </button>
+          </div>
         {% endfor %}
       </div>
     {% endif %}
-
-    <hr>
 
     {# How many pictures already? #}
     {% set existing = images|length %}

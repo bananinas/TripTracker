@@ -161,4 +161,38 @@ hr {
   }
 
 }
+/* ===== Existing images layout (edit_report.html) ===== */
+.existing-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 15px;
+}
 
+.image-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.image-card img {
+  max-width: 300px;
+  height: auto;
+  display: block;
+}
+
+.image-card form {
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  margin-top: 6px;
+}
+
+.image-card form {
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  margin-top: 10px;  
+}

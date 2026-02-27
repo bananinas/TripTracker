@@ -33,9 +33,11 @@ def check_csrf():
         abort(403)
 
 # Pic settings
-UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
+
+UPLOAD_FOLDER = os.path.join(app.root_path, "uploads")
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # check function for uploaded files
 def allowed_file(filename):
@@ -189,8 +191,13 @@ def create_report():
     if "images" in request.files:
         images = request.files.getlist("images")
         for image in images[:5]:
+
+            if image.filename == "":
+                continue
+
             if image and allowed_file(image.filename):
                 filename = secure_filename(image.filename)
+                filename = f"{report_id}_{int(datetime.now().timestamp())}_{filename}"
                 path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                 image.save(path)
 
@@ -324,27 +331,33 @@ def update_report(report_id):
     current_month = datetime.now().month
     if int(year) == current_year and int(month) > current_month:
         return render_template(
-            "new_report.html",
+            "edit_report.html",
+            report=report,
             holiday_types=holiday_types,
             themes=themes,
             countries=countries,
-            title=title,
-            description=description,
-            country=country,
-            travel_date=travel_date,
+            images=images,
             current_year=current_year,
             date_error="Travel date cannot be in the future."
         )
 
-
     # all okay check -> update
     reports.update_report(report_id, title, description, travel_date, country, section, theme)
 
-    if "images" in request.files:
+    # how many images can still be added (max 5 total)
+    existing = len(reports.get_images(report_id))
+    slots = max(0, 5 - existing)
+
+    if "images" in request.files and slots > 0:
         files = request.files.getlist("images")
-        for file in files[:5]:
+        for file in files[:slots]:
+
+            if file.filename == "":
+                continue
+
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
+                filename = f"{report_id}_{int(datetime.now().timestamp())}_{filename}"
                 file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
                 db.execute(
@@ -425,7 +438,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-    del session["username"]
+    session.pop("username", None)
     flash("You have successfully signed out.")
     return redirect("/")
 
