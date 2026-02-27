@@ -22,6 +22,7 @@ CREATE TABLE comments (
     report_id INTEGER REFERENCES reports(id),
     username TEXT REFERENCES users(username),
     content TEXT NOT NULL,
+    status INTEGER DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
